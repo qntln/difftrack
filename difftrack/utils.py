@@ -131,6 +131,9 @@ def squash_difftrack_results(diffs: List[types.Diff]) -> Iterator[types.SquashRe
 	'''
 	Squashes consecutive insert / replace / delete operations
 	'''
+	if not diffs:
+		return []
+
 	current_batch = [ diffs[0] ] # List[types.Diff]
 	for data in diffs[1:]:
 		dtype, index, payload = data

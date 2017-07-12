@@ -521,3 +521,10 @@ def test_squash_diffs_general_data():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, []),
 	]
 	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+
+
+def test_empty_squash():
+	diffs = []
+	out_diffs = []
+
+	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs

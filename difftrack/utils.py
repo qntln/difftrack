@@ -1,9 +1,8 @@
-from typing import Callable, List, Iterator
+from typing import Callable, List, Iterator # noqa
 import contextlib
 import functools
 
 from . import types, listeners
-
 
 
 
@@ -23,28 +22,6 @@ def data_mapper(mapper: Callable[[types.DataType], types.DataType]) -> Callable[
 
 		return wrapped
 	return decorator
-
-
-
-_tombstone = object()
-
-def compact_dict_diffs(diffs: List[types.Diff]) -> List[types.Diff]:
-	'''
-	[SET(x)_0, SET(x)_1, ... SET(x)_n] -> [SET(x)_n]
-	[SET(x)_0, ... SET(x)_n, DELETE(x)] -> [DELETE(x)]
-
-	TODO: this produces duplicate DELETEs when called repeatedly. We might want to suppress KeyErrors in DictListener.
-	'''
-	compacted = {}
-	for (dtype, key, data) in diffs:
-		if dtype is types.DictDiff.SET:
-			compacted[key] = data
-		elif dtype is types.DictDiff.DELETE:
-			compacted[key] = _tombstone
-	return [
-		(types.DictDiff.DELETE, key, None) if value is _tombstone else (types.DictDiff.SET, key, value)
-		for (key, value) in compacted.items()
-	]
 
 
 

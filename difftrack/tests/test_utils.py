@@ -6,28 +6,6 @@ import difftrack
 
 
 
-def test_compact_dict_diffs():
-	diffs = [
-		(difftrack.DictDiff.SET, 'x', 123),
-		(difftrack.DictDiff.SET, 'y', 456),
-		(difftrack.DictDiff.SET, 'y', 9999),
-		(difftrack.DictDiff.DELETE, 'x', None),
-	]
-	assert set(difftrack.compact_dict_diffs(diffs)) == {
-		(difftrack.DictDiff.SET, 'y', 9999),
-		(difftrack.DictDiff.DELETE, 'x', None),
-	}
-
-
-def test_compact_dict_diffs_single_delete():
-	diffs = [
-		(difftrack.DictDiff.DELETE, 'x', None),
-	]
-	assert set(difftrack.compact_dict_diffs(diffs)) == {
-		(difftrack.DictDiff.DELETE, 'x', None),
-	}
-
-
 class TestBoundedListDiffHandler:
 
 	@pytest.fixture

@@ -17,7 +17,7 @@ class DictDiff(fastenum.Enum):
 @attr.s
 class SquashResults:
 	operation = attr.ib(validator = attr.validators.in_(ListDiff))
-	start	= attr.ib()
+	start = attr.ib()
 	stop = attr.ib()
 	payload = attr.ib(default = attr.Factory(list))
 
@@ -28,3 +28,8 @@ DataType = TypeVar('DataType')
 ContainerType = TypeVar('ContainerType')
 Diff = Tuple[DiffType, IndexType, DataType]
 ListenerType = Callable[[DiffType, IndexType, DataType], None]
+
+# Indices of values in DiffType tuple
+TYPE = 0
+INDEX = 1
+DATA = 2

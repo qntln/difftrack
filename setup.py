@@ -20,6 +20,7 @@ setup(
 	install_requires = [
 		'fastenum==0.0.1',
 		'attrs==17.2.0',
+		'sortedcontainers==1.5.7',
 	],
 	packages = [
 		'difftrack',

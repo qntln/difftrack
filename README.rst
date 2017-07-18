@@ -200,6 +200,24 @@ applicable now:
 		(difftrack.DictDiff.DELETE, 'x', None),
 	]
 
+``compact_list_diffs``
+~~~~~~~~~~~~~~~~~~~~~~
+
+The same kind of compaction is available for lists as well:
+
+.. code:: python
+
+	>>> diffs = [
+		(difftrack.ListDiff.INSERT, 0, 'aaa'),
+		(difftrack.ListDiff.INSERT, 1, 'bbb'),
+		(difftrack.ListDiff.DELETE, 0, None)
+		(difftrack.ListDiff.REPLACE, 1, 'ccc'),
+	]
+	>>> difftrack.compact_list_diffs(diffs)
+	[
+		(difftrack.ListDiff.INSERT, 1, 'ccc'),
+	]
+
 ``BoundedListDiffHandler``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 

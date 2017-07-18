@@ -1,4 +1,4 @@
-from typing import List, Dict # noqa
+from typing import List, Iterator # noqa
 
 import sortedcontainers.sorteddict
 
@@ -160,3 +160,62 @@ def _update_compacted_on_delete(deleted_op_index: int, position_in_compacted: in
 
 		if compacted_op[INDEX] >= deleted_op_index:
 			compacted[op_index] = (compacted_op[TYPE], compacted_op[INDEX] - 1, compacted_op[DATA])
+
+
+def _squash_single_list_diffs_sequence(diffs: List[types.Diff]) -> types.SquashResults:
+	'''
+	Squashables:
+		Inserts by indexes (appending):
+				1, 2, 3, 4, 5, ..
+		Replaces by indexes and payload lengths (merging replaces by consecutive blocks):
+				4 (+2), 6 (+3), 9 (+1), ..
+		Deletes by indexes (removing single elements /w reindexing):
+				1, 1, 1, 1, ..
+	'''
+	dtype = diffs[0][0]
+	start = diffs[0][1]
+	payload = [] # type: List[types.DataType]
+	if dtype is types.ListDiff.INSERT:
+		for _, _, _p in diffs:
+			payload.append(_p)
+		stop = start + len(payload) - 1
+	elif dtype is types.ListDiff.REPLACE:
+		for _, _, _p in diffs:
+			payload.append(_p)
+		stop = start + len(payload)
+	else:
+		# DELETE
+		stop = start + len(diffs)
+	return types.SquashResults(dtype, start, stop, payload)
+
+
+def squash_list_diffs(diffs: List[types.Diff]) -> Iterator[types.SquashResults]:
+	'''
+	Squashes consecutive insert / replace / delete operations
+	'''
+	if not diffs:
+		return []
+
+	current_batch = [diffs[0]] # type: List[types.Diff]
+	for data in diffs[1:]:
+		dtype, index, payload = data
+		prev_dtype, prev_index, prev_payload = current_batch[-1]
+
+		append_to_storage = False
+		if dtype == prev_dtype:
+			if dtype is types.ListDiff.INSERT:
+				append_to_storage = prev_index + 1 == index
+			elif dtype is types.ListDiff.DELETE:
+				append_to_storage = prev_index == index
+			else:
+				# REPLACE
+				append_to_storage = prev_index + 1 == index
+
+		if append_to_storage:
+			current_batch.append(data)
+		else:
+			yield _squash_single_list_diffs_sequence(current_batch)
+			current_batch = [data]
+
+	if len(current_batch) > 0:
+		yield _squash_single_list_diffs_sequence(current_batch)

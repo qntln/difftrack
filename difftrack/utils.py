@@ -1,4 +1,4 @@
-from typing import Callable, List, Iterator # noqa
+from typing import Callable, List # noqa
 import contextlib
 import functools
 
@@ -75,61 +75,3 @@ class BoundedListDiffHandler:
 	def finalize_batch(self):
 		if self._listener_finalize_batch_function is not None:
 			self._listener_finalize_batch_function()
-
-
-
-def merge_difftrack_results(diffs: List[types.Diff]) -> types.SquashResults:
-	'''
-	Squashables:
-		Inserts by indexes (appending):
-				1, 2, 3, 4, 5, ..
-		Replaces by indexes and payload lengths (merging replaces by consecutive blocks):
-				4 (+2), 6 (+3), 9 (+1), ..
-		Deletes by indexes (removing single elements /w reindexing):
-				1, 1, 1, 1, ..
-	'''
-	dtype = diffs[0][0]
-	start = diffs[0][1]
-	payload = [] # List[types.DataType]
-	if dtype is types.ListDiff.INSERT:
-		for _, _, _p in diffs:
-			payload.append(_p)
-		stop = start + len(payload) - 1
-	elif dtype is types.ListDiff.REPLACE:
-		for _, _, _p in diffs:
-			payload.append(_p)
-		stop = start + len(payload)
-	else: # DELETE
-		stop = start + len(diffs)
-	return types.SquashResults(dtype, start, stop, payload)
-
-
-def squash_difftrack_results(diffs: List[types.Diff]) -> Iterator[types.SquashResults]:
-	'''
-	Squashes consecutive insert / replace / delete operations
-	'''
-	if not diffs:
-		return []
-
-	current_batch = [ diffs[0] ] # List[types.Diff]
-	for data in diffs[1:]:
-		dtype, index, payload = data
-		prev_dtype, prev_index, prev_payload = current_batch[-1]
-
-		append_to_storage = False
-		if dtype == prev_dtype:
-			if dtype is types.ListDiff.INSERT:
-				append_to_storage = prev_index + 1 == index
-			elif dtype is types.ListDiff.DELETE:
-				append_to_storage = prev_index == index
-			else: # REPLACE
-				append_to_storage = prev_index + 1 == index
-
-		if append_to_storage:
-			current_batch.append(data)
-		else:
-			yield merge_difftrack_results(current_batch)
-			current_batch = [ data ]
-
-	if len(current_batch) > 0:
-		yield merge_difftrack_results(current_batch)

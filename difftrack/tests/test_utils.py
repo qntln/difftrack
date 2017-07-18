@@ -191,7 +191,7 @@ def test_squash_diffs_no_squash():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_insert():
@@ -213,7 +213,7 @@ def test_squash_diffs_insert():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_insert_with_space():
@@ -237,7 +237,7 @@ def test_squash_diffs_mixed_insert_with_space():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_insert_with_op_between():
@@ -261,7 +261,7 @@ def test_squash_diffs_mixed_insert_with_op_between():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_insert_wrong_ordering():
@@ -281,7 +281,7 @@ def test_squash_diffs_mixed_insert_wrong_ordering():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_replace():
@@ -308,7 +308,7 @@ def test_squash_diffs_replace():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_replace_with_space():
@@ -338,7 +338,7 @@ def test_squash_diffs_mixed_replace_with_space():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_replace_with_op_betwen():
@@ -371,7 +371,7 @@ def test_squash_diffs_mixed_replace_with_op_betwen():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_replace_with_wrong_order():
@@ -403,7 +403,7 @@ def test_squash_diffs_mixed_replace_with_wrong_order():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_delete():
@@ -421,7 +421,7 @@ def test_squash_diffs_delete():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 4, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_delete_with_space():
@@ -441,7 +441,7 @@ def test_squash_diffs_mixed_delete_with_space():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_delete_with_op_between():
@@ -461,7 +461,7 @@ def test_squash_diffs_mixed_delete_with_op_between():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_mixed_delete_with_wrong_order():
@@ -481,7 +481,7 @@ def test_squash_diffs_mixed_delete_with_wrong_order():
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 3, 4, [])
 	]
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_squash_diffs_general_data():
@@ -498,11 +498,11 @@ def test_squash_diffs_general_data():
 		difftrack.SquashResults(difftrack.ListDiff.REPLACE, 1, 2, ['DDD']),
 		difftrack.SquashResults(difftrack.ListDiff.DELETE, 1, 2, []),
 	]
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs
 
 
 def test_empty_squash():
 	diffs = []
 	out_diffs = []
 
-	assert list(difftrack.squash_difftrack_results(diffs)) == out_diffs
+	assert list(difftrack.squash_list_diffs(diffs)) == out_diffs

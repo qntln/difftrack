@@ -234,8 +234,8 @@ If we want to keep our list bounded we can use
 	>>> listener.get_snapshot()
 	['b', 'c']
 
-``squash_difftrack_results``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``squash_list_diffs``
+~~~~~~~~~~~~~~~~~~~~~
 
 This function groups consecutive diffs.
 
@@ -249,7 +249,7 @@ This function groups consecutive diffs.
 		(difftrack.ListDiff.REPLACE, 1, 'D'),
 		(difftrack.ListDiff.DELETE, 1, [])
 	]
-	>>> list(difftrack.squash_difftrack_results(diffs))
+	>>> list(difftrack.squash_list_diffs(diffs))
 	[
 		SquashResults(operation=<difftrack.ListDiff.INSERT: 0>, start=1, stop=3, payload=['A', 'B', 'C']),
 		SquashResults(operation=<difftrack.ListDiff.REPLACE: 1>, start=1, stop=2, payload=['D']),

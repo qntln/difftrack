@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup
+from setuptools import setup
 
 
 
@@ -20,7 +20,7 @@ setup(
 	install_requires = [
 		'fastenum==0.0.1',
 		'attrs==17.2.0',
-		'sortedcontainers==1.5.7',
+		'sortedcontainers==1.5.9',
 	],
 	packages = [
 		'difftrack',
@@ -30,6 +30,6 @@ setup(
 		'License :: OSI Approved :: Apache Software License',
 		'Natural Language :: English',
 		'Programming Language :: Python :: 3 :: Only',
-		'Programming Language :: Python :: 3.5',
+		'Programming Language :: Python :: 3.6',
 	]
 )

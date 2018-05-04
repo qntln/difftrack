@@ -39,11 +39,13 @@ class Dispatcher(Generic[types.DiffType, types.IndexType]):
 
 		self._active = True
 		self._should_finalize = True
-		while self._diffs_to_apply:
-			diff_dtype, diff_index, diff_data = self._diffs_to_apply.popleft()
-			for listener in self._listeners:
-				listener(diff_dtype, diff_index, diff_data)
-		self._apply_diff_recursion = 0
+		try:
+			while self._diffs_to_apply:
+				diff_dtype, diff_index, diff_data = self._diffs_to_apply.popleft()
+				for listener in self._listeners:
+					listener(diff_dtype, diff_index, diff_data)
+		finally:
+			self._apply_diff_recursion = 0
 
 
 	def finalize_batch(self):

@@ -1,6 +1,7 @@
-from typing import Any, List, Generic, Dict, Callable, Optional
+from typing import Any, List, Generic, Dict, Callable, Optional, Iterator
 
 import abc
+import collections
 
 from . import types
 
@@ -20,8 +21,9 @@ class Listener(abc.ABC, Generic[types.ContainerType, types.IndexType]):
 		'''
 		:param on_change: Optional callback executed after every diff application.
 		'''
-		self._data = self._DATA_FACTORY()
-		self._new_diffs = [] # type: List[types.Diff]
+		# Derived classes define this.
+		self._data = self._DATA_FACTORY() # pylint: disable=not-callable
+		self._new_diffs = collections.deque() # type: Deque[types.Diff]
 		self.on_change = on_change
 		self.on_finalize_batch = on_finalize_batch
 
@@ -41,6 +43,17 @@ class Listener(abc.ABC, Generic[types.ContainerType, types.IndexType]):
 		return self._data
 
 
+	def yield_new_diffs(self) -> Iterator[types.Diff]:
+		'''
+		*Applies new diffs one by one* to the current snapshot and after each application yields applied diff.
+		Once the diffs are applied and yielded from this function they are forgotten.
+		'''
+		while self._new_diffs:
+			diff = self._new_diffs.popleft()
+			self._apply_diff(*diff)
+			yield diff
+
+
 	def get_new_diffs(self) -> List[types.Diff]:
 		'''
 		Return any outstanding diffs *and apply them* to the current snapshot. This guarantees that the following
@@ -55,11 +68,7 @@ class Listener(abc.ABC, Generic[types.ContainerType, types.IndexType]):
 
 		Once the diffs are applied and returned from this function they are forgotten.
 		'''
-		diffs = self._new_diffs
-		self._new_diffs = []
-		for diff in diffs:
-			self._apply_diff(*diff)
-		return diffs
+		return list(self.yield_new_diffs())
 
 
 	@property

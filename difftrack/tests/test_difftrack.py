@@ -73,6 +73,28 @@ def test_dict():
 
 
 
+def test_yield_new_diffs():
+	dispatcher = difftrack.DictDispatcher()
+	listener = difftrack.DictListener()
+	dispatcher.add_listener(listener)
+
+	dispatcher['x'] = 123
+	dispatcher['y'] = 456
+	generator = listener.yield_new_diffs()
+	assert listener.get_snapshot() == {}, 'Diffs are not applied until yield_new_diffs is iterated'
+	assert next(generator) == (difftrack.DictDiff.SET, 'x', 123)
+	assert listener.get_snapshot() == {'x': 123}
+	assert next(generator) == (difftrack.DictDiff.SET, 'y', 456)
+	assert listener.get_snapshot() == {'x': 123, 'y': 456}
+
+	dispatcher['y'] = 9999
+	del dispatcher['x']
+	assert next(generator) == (difftrack.DictDiff.SET, 'y', 9999)
+	assert next(generator) == (difftrack.DictDiff.DELETE, 'x', None)
+	assert listener.get_snapshot() == {'y': 9999}
+
+
+
 def test_on_change():
 	cb = mock.Mock()
 	listener = difftrack.DictListener(on_change = cb)
@@ -129,7 +151,7 @@ def test_finalize_function_listener():
 	Test that we don't care that listener does not have `.finalize_batch()`
 	'''
 	function_listener_counter = 0
-	def function_listener(*args):
+	def function_listener(*_args):
 		nonlocal function_listener_counter
 		function_listener_counter += 1
 

@@ -24,7 +24,7 @@ Basic usage
 -----------
 
 In the following example we are going to create a list dispatcher (you can
-write to it as to a list: use operation ``__setitem__``, ``__delitem__``
+write to it as to a list using ``__setitem__``, ``__delitem__``
 and ``insert``) and two listeners that will listen for diffs and keep
 their own internal state.
 
@@ -112,18 +112,19 @@ In this example we show the ``on_change`` callback and its ability to
 work with a dispatcher. Note that we are first using the
 ``ListDiff.INSERT`` operation but the callback triggers a
 ``ListDiff.REPLACE`` operation. If it would lead to ``ListDiff.INSERT`` again we
-would end in recursion and after 10 tries ``difftrack`` would raise an
-exception.
+would end in recursion and after 10 iterations ``difftrack`` would give up and
+raise an exception.
 
 ``on_finalize_batch``
 ~~~~~~~~~~~~~~~~~~~~~
 
-Let's say that you are receiving batches of changes and you apply them
-on by one. Now when you want to be noted for new changes you may use
-``on_change`` callback but it would be triggered every time you perform
-an operation on the dispatcher. We may want to be notified only when we
-apply all changes in our batch to the dispatcher. There is
-another callback for this, ``on_finalize_batch``:
+The dispatcher may communicate to its listeners that a certain sequence
+of diffs belongs together, i.e. form a *batch*. We do this by using the
+dispatcher as a context manager, wrapping diff operations that belong together.
+
+A listener may provide another callback called ``on_finalize_batch`` that
+gets called every time the dispatcher finishes dispatching a batch
+(the context is exited).
 
 .. code:: python
 
@@ -148,7 +149,7 @@ another callback for this, ``on_finalize_batch``:
 	FINALIZED
 
 We can see that the ``on_change`` callback is called every time but
-``on_finalize_batch`` only when we exit the context manager.
+``on_finalize_batch`` only when we exit the context.
 
 Utilities
 ---------
@@ -183,8 +184,8 @@ Data mapper applies a function to every data field:
 ~~~~~~~~~~~~~~~~~~~~~~
 
 When you update a dict item several times or even delete it you
-sometimes don't want to send all the changes. Only those that are
-applicable now:
+sometimes don't want to keep all the changes. You can use *compaction*
+to drop changes that cancel or override each other out:
 
 .. code:: python
 
@@ -221,8 +222,8 @@ The same kind of compaction is available for lists as well:
 ``BoundedListDiffHandler``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If we want to keep our list bounded we can use
-``difftrack.BoundedListDiffHandler``
+If we want to keep our list bounded (capped to a certain size) we can use
+``difftrack.BoundedListDiffHandler``.
 
 .. code:: python
 
@@ -255,7 +256,7 @@ If we want to keep our list bounded we can use
 ``squash_list_diffs``
 ~~~~~~~~~~~~~~~~~~~~~
 
-This function groups consecutive diffs.
+This function groups list diffs affecting consecutive indices.
 
 .. code:: python
 
@@ -269,7 +270,7 @@ This function groups consecutive diffs.
 	]
 	>>> list(difftrack.squash_list_diffs(diffs))
 	[
-		SquashResults(operation=<difftrack.ListDiff.INSERT: 0>, start=1, stop=3, payload=['A', 'B', 'C']),
+		SquashResults(operation=<difftrack.ListDiff.INSERT: 0>, start=1, stop=1, payload=['A', 'B', 'C']),
 		SquashResults(operation=<difftrack.ListDiff.REPLACE: 1>, start=1, stop=2, payload=['D']),
 		SquashResults(operation=<difftrack.ListDiff.DELETE: 2>, start=1, stop=2, payload=[])
 	]

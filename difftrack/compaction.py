@@ -1,6 +1,6 @@
 from typing import List, Iterator # noqa
 
-import sortedcontainers.sorteddict
+import sortedcontainers
 
 from . import types
 from .types import TYPE, INDEX, DATA
@@ -43,8 +43,8 @@ def compact_list_diffs(diffs: List[types.Diff]) -> List[types.Diff]:
 	# Resulting list of operations
 	compacted = [] # type: List[types.Diff]
 	# Mapping from original operation index -> compacted list index. Updated on each operation, so that the index of
-	# operation result -> index of operation in compacted list. First argument is load factor.
-	op_index_to_compacted_index = sortedcontainers.SortedDict(10) # type: sortedcontainers.sorteddict[int, int]
+	# operation result -> index of operation in compacted list.
+	op_index_to_compacted_index = sortedcontainers.SortedDict() # type: sortedcontainers.SortedDict[int, int]
 
 	for op in diffs:
 		if op[TYPE] is types.ListDiff.INSERT:
@@ -81,7 +81,11 @@ def _append_op(op: types.Diff, compacted: List[types.Diff], op_index_to_compacte
 	compacted.append(op)
 
 
-def _perform_replace(op: types.Diff, compacted: List[types.Diff], op_index_to_compacted_index: 'SortedDict[int, int]') -> None:
+def _perform_replace(
+	op: types.Diff,
+	compacted: List[types.Diff],
+	op_index_to_compacted_index: 'SortedDict[int, int]'
+) -> None:
 	'''Compact [INSERT, ..., REPLACE] or [REPLACE, ..., REPLACE] pair if possible'''
 	if op[INDEX] not in op_index_to_compacted_index:
 		_append_op(op, compacted, op_index_to_compacted_index)
@@ -96,7 +100,11 @@ def _perform_replace(op: types.Diff, compacted: List[types.Diff], op_index_to_co
 	compacted[position_in_compacted] = replaced_op[TYPE], replaced_op[INDEX], op[DATA]
 
 
-def _perform_delete(op: types.Diff, compacted: List[types.Diff], op_index_to_compacted_index: 'SortedDict[int, int]') -> None:
+def _perform_delete(
+	op: types.Diff,
+	compacted: List[types.Diff],
+	op_index_to_compacted_index: 'SortedDict[int, int]'
+) -> None:
 	'''Compact [INSERT, ..., DELETE] or [REPLACE, ..., DELETE] pair if possible'''
 	if op[INDEX] not in op_index_to_compacted_index:
 		# [..., DELETE]. Unpaired DELETE: nothing to compact
@@ -133,7 +141,11 @@ def _perform_delete(op: types.Diff, compacted: List[types.Diff], op_index_to_com
 				del op_index_to_compacted_index[map_op_index]
 
 
-def _remove_from_compacted(index: int, compacted: List[types.Diff], op_index_to_compacted_index: 'SortedDict[int, int]') -> None:
+def _remove_from_compacted(
+	index: int,
+	compacted: List[types.Diff],
+	op_index_to_compacted_index: 'SortedDict[int, int]'
+) -> None:
 	'''Remove given Diff from `compacted` list and update the helper map'''
 	del compacted[index]
 
@@ -172,13 +184,12 @@ def _squash_single_list_diffs_sequence(diffs: List[types.Diff]) -> types.SquashR
 		Deletes by indexes (removing single elements /w reindexing):
 				1, 1, 1, 1, ..
 	'''
-	dtype = diffs[0][0]
-	start = diffs[0][1]
+	dtype, start, _ = diffs[0]
 	payload = [] # type: List[types.DataType]
 	if dtype is types.ListDiff.INSERT:
 		for _, _, _p in diffs:
 			payload.append(_p)
-		stop = start + len(payload) - 1
+		stop = start
 	elif dtype is types.ListDiff.REPLACE:
 		for _, _, _p in diffs:
 			payload.append(_p)
@@ -194,12 +205,12 @@ def squash_list_diffs(diffs: List[types.Diff]) -> Iterator[types.SquashResults]:
 	Squashes consecutive insert / replace / delete operations
 	'''
 	if not diffs:
-		return []
+		return
 
 	current_batch = [diffs[0]] # type: List[types.Diff]
 	for data in diffs[1:]:
-		dtype, index, payload = data
-		prev_dtype, prev_index, prev_payload = current_batch[-1]
+		dtype, index, _ = data
+		prev_dtype, prev_index, _ = current_batch[-1]
 
 		append_to_storage = False
 		if dtype == prev_dtype:
@@ -217,5 +228,5 @@ def squash_list_diffs(diffs: List[types.Diff]) -> Iterator[types.SquashResults]:
 			yield _squash_single_list_diffs_sequence(current_batch)
 			current_batch = [data]
 
-	if len(current_batch) > 0:
+	if current_batch:
 		yield _squash_single_list_diffs_sequence(current_batch)

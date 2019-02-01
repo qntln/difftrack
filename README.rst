@@ -10,13 +10,13 @@ observe and support (these structures are called "dispatchers").
 
 - ``Dispatcher`` - acts like a data structure you write to but also sends
   all changes (diffs) to all its listeners.
-- ``Listener`` - a listener is connected to one dispatcher and applies incomming
+- ``Listener`` - a listener is connected to one dispatcher and applies incoming
   diffs to its internal structure so each listener looks like the original data
   structure after applying all those diffs.
 
 This division allows ``difftrack`` to have multiple listeners in
 different stages of applying diffs, and it enables listeners
-with special abbilities (e.g. ``difftrack.utils.BoundedListDiffHandler``
+with special abilities (e.g. ``difftrack.utils.BoundedListDiffHandler``
 implementing a "top N" list: the list never exceeds a certain fixed size
 but when some items are deleted, previously invisible elements appear).
 
